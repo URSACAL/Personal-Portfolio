@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbfaf6">
+  <title>Portfolio</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #0b4a30;
+      --green-dark: #083522;
+      --gold: #deb248;
+      --ink: #10201a;
+      --muted: #59665e;
+      --line: rgba(16, 32, 26, .14);
+      --paper: #fbfaf6;
+      --card: #fff;
+      --serif: "Young Serif", Georgia, serif;
+      --sans: "Hanken Grotesk", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 64px 7vw;
+      color: var(--ink);
+      background: var(--paper);
+      font: 16px/1.6 var(--sans);
+    }
+    .portfolio { width: min(100%, 1040px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 32px;
+      font: 400 clamp(34px, 5vw, 52px)/1.1 var(--serif);
+      letter-spacing: -.03em;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+    .filter-button {
+      flex: 0 0 auto;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      color: var(--muted);
+      background: transparent;
+      font: 600 12px var(--sans);
+      cursor: pointer;
+      transition: color .2s, background .2s, border-color .2s;
+    }
+    .filter-button:hover,
+    .filter-button[aria-pressed="true"] {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+    }
+    .filter-button:focus-visible,
+    .work-link:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .grid.is-changing { opacity: 0; transform: translateY(6px); }
+    .card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: 0 2px 14px rgba(16, 32, 26, .05);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(10, 107, 69, .5);
+      box-shadow: 0 18px 40px rgba(16, 32, 26, .14);
+    }
+    .card-media {
+      position: relative;
+      display: grid;
+      min-height: 190px;
+      overflow: hidden;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green), #14402b);
+    }
+    .card-media::after {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(222, 178, 72, .5);
+      border-radius: 50%;
+      box-shadow: 0 0 0 12px rgba(222, 178, 72, .06);
+      content: "";
+      pointer-events: none;
+    }
+    .card-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-image:not([src]), .card-image[hidden] { display: none; }
+    .badge {
+      position: absolute;
+      z-index: 1;
+      top: 12px;
+      left: 12px;
+      padding: 5px 8px;
+      border-radius: 5px;
+      color: var(--gold);
+      background: rgba(4, 14, 10, .82);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .card-content { padding: 17px; }
+    .category {
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 7px 0 8px;
+      font: 400 19px/1.35 var(--serif);
+    }
+    .description {
+      min-height: 3.6em;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .work-link {
+      display: inline-flex;
+      margin-top: 13px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .empty-state {
+      padding: 28px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+    .empty-state[hidden] { display: none; }
+    @media (max-width: 640px) {
+      body { padding: 44px 6vw; }
+      .filters { flex-wrap: nowrap; overflow-x: auto; padding: 2px 0 6px; }
+      .grid { grid-template-columns: 1fr; }
+      .card-media { min-height: 210px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="portfolio">
+    <p class="eyebrow">Portfolio</p>
+    <h1>Things I’ve made and done.</h1>
+
+    <div class="filters" id="portfolioFilters" role="group" aria-label="Filter portfolio by topic">
+      <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
+      <button class="filter-button" type="button" data-filter="web-dev" aria-pressed="false">Web Dev</button>
+      <button class="filter-button" type="button" data-filter="robotics" aria-pressed="false">Robotics</button>
+      <button class="filter-button" type="button" data-filter="teaching" aria-pressed="false">Teaching</button>
+    </div>
+
+    <div class="grid" id="portfolioGrid" aria-live="polite">
+      <!-- Edit cards here: replace each placeholder thumbnail, link, title, and description. -->
+      <article class="card" data-category="web-dev">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Web Development Practice thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">WEB DEV</span>
+          <h2>Web Development Practice</h2>
+          <p class="description">HTML, CSS and JavaScript exercises from my programming studies and my own experiments.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="web-dev">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Live Demo Website thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">WEB DEV</span>
+          <h2>Live Demo Website</h2>
+          <p class="description">A placeholder for a live demo site. Replace this card with a website you have built and link to its GitHub repository or live demo.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PHOTO</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Robotics Build thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Robotics Build</h2>
+          <p class="description">A placeholder for a robotics build. Add a photo and a short description of the project.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">VIDEO</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Robotics Demo thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Robotics Demo</h2>
+          <p class="description">A placeholder for a robotics demonstration. Add a video thumbnail and a link to the demo.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <img class="card-image" src="assets/morse-code-circuit.png" alt="Morse Code Circuit thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Morse Code Circuit</h2>
+          <p class="description">An interactive Tinkercad circuit project for exploring Morse code.</p>
+          <a class="work-link" href="https://www.tinkercad.com/things/kGWPJFTlONv?sharecode=enjg8jVyTOQl0Luuheq6UuUMNp_0YrXOSJVc7Q5v1fg" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <img class="card-image" src="assets/remote-controlled-gate.png" alt="Remote-Controlled Gate Circuit thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Remote-Controlled Gate Circuit</h2>
+          <p class="description">A Tinkercad circuit project for a remote-controlled gate.</p>
+          <a class="work-link" href="https://www.tinkercad.com/things/b2mlFYRyhSU?sharecode=b3135X_rp7hTGj3ertf9Whl4sQaKd1RxPPrT6CXCkpc" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" src="https://csg.us-east-1.prd.tinkercad.com/things/gNqwAQXChZk/t725.png?rev=1794375961293000000&amp;s=&amp;v=1&amp;type=circuits&amp;sharecode=NZu31M9fI2PZlGS5rJosMZkIVuOTwFrE_qYySGip0L4" alt="Water Level and Temperature Alarm circuit preview" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Water Level and Temperature Alarm</h2>
+          <p class="description">A Tinkercad circuit project for a water-level and temperature alarm.</p>
+          <a class="work-link" href="https://www.tinkercad.com/things/gNqwAQXChZk?sharecode=NZu31M9fI2PZlGS5rJosMZkIVuOTwFrE_qYySGip0L4" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" src="https://csg.us-east-1.prd.tinkercad.com/things/8YCzTTLGrNu/t725.png?rev=1794375998278000000&amp;s=&amp;v=1&amp;type=circuits&amp;sharecode=HrmFT1_18tYcM0v4VEqvYcZaG5S5T9KPCq0WjVkQAVI" alt="Multiple Buttons and LEDs circuit preview" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Multiple Buttons and LEDs</h2>
+          <p class="description">A Tinkercad circuit project featuring multiple buttons and LEDs.</p>
+          <a class="work-link" href="https://www.tinkercad.com/things/8YCzTTLGrNu?sharecode=HrmFT1_18tYcM0v4VEqvYcZaG5S5T9KPCq0WjVkQAVI" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="robotics">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" src="https://csg.us-east-1.prd.tinkercad.com/things/k06FoPHWwJ5/t725.png?rev=1794382787842000000&amp;s=&amp;v=1&amp;type=circuits&amp;sharecode=xunVFzg_TJiAI2esJqc3J4BjPCllbqlJw7BxbvE3Xvw" alt="Sensor Project circuit preview" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">ROBOTICS</span>
+          <h2>Sensor Project</h2>
+          <p class="description">A Tinkercad circuit project exploring sensors.</p>
+          <a class="work-link" href="https://www.tinkercad.com/things/k06FoPHWwJ5?sharecode=xunVFzg_TJiAI2esJqc3J4BjPCllbqlJw7BxbvE3Xvw" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="teaching">
+        <div class="card-media">
+          <span class="badge">PROJECT</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Interactive Learning Materials thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">TEACHING</span>
+          <h2>Interactive Learning Materials</h2>
+          <p class="description">Slides, worksheets and hands-on activities I prepare for my Grade 7 computer classes. Replace the link with your public Google Drive folder.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="teaching">
+        <div class="card-media">
+          <span class="badge">VIDEO</span>
+          <!-- REPLACE IMAGE -->
+          <img class="card-image" alt="Lesson Activity Recording thumbnail" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="category">TEACHING</span>
+          <h2>Lesson Activity Recording</h2>
+          <p class="description">A placeholder for a lesson activity or screen recording. Replace it with a link to your resource.</p>
+          <!-- REPLACE LINK -->
+          <a class="work-link" href="#" target="_blank" rel="noopener noreferrer">Open link ↗</a>
+        </div>
+      </article>
+    </div>
+    <p class="empty-state" id="emptyState" role="status" hidden>More coming soon</p>
+  </main>
+
+  <script>
+    const filterBar = document.querySelector("#portfolioFilters");
+    const grid = document.querySelector("#portfolioGrid");
+    const emptyState = document.querySelector("#emptyState");
+    let activeCategory = "all";
+    let transitionTimer;
+
+    filterBar.addEventListener("click", event => {
+      const button = event.target.closest("button[data-filter]");
+      if (!button) return;
+
+      activeCategory = button.dataset.filter;
+      filterBar.querySelectorAll("button[data-filter]").forEach(filter => {
+        const selected = filter === button;
+        filter.classList.toggle("active", selected);
+        filter.setAttribute("aria-pressed", String(selected));
+      });
+
+      grid.classList.add("is-changing");
+      clearTimeout(transitionTimer);
+      transitionTimer = setTimeout(() => {
+        const cards = [...grid.querySelectorAll(".card")];
+        let visibleCount = 0;
+        cards.forEach(card => {
+          const visible = activeCategory === "all" || card.dataset.category === activeCategory;
+          card.hidden = !visible;
+          if (visible) visibleCount++;
+        });
+        emptyState.hidden = visibleCount > 0;
+        requestAnimationFrame(() => grid.classList.remove("is-changing"));
+      }, 140);
+    });
+
+    grid.querySelectorAll(".card-image").forEach(image => {
+      image.addEventListener("error", () => { image.hidden = true; }, { once: true });
+    });
+  </script>
+</body>
+</html>
